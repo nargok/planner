@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -23,6 +23,8 @@ const style = {
 };
 
 const BoardHome = () => {
+  const [isClient, setIsClient] = useState(false);
+
   const [items, setItems] = useState<Array<Item>>([
     { id: 1, name: "dnd-kit example 1" },
     { id: 2, name: "dnd-kit example 2" },
@@ -40,6 +42,14 @@ const BoardHome = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
