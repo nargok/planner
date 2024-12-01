@@ -108,6 +108,11 @@ const BoardHome = () => {
     }
   };
 
+  /**
+   * TODO
+   *  - カラム移動するときに明細が消える
+   *  - すべてのItemを移動するとカラムにItemをDragできない
+   */
   return (
     <DndContext
       sensors={sensors}

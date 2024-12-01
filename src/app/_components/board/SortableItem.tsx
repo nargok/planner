@@ -8,22 +8,28 @@ type Props = {
 };
 
 const SortableItem: FC<Props> = ({ item }: Props) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: item.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
 
   const style = {
-    border: "1px solid #ddd",
-    padding: "0.5rem 1rem",
-    marginBottom: "0.5rem",
-    backgroundColor: "#fafafa",
-    cursor: "move",
-    listStyle: "none",
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`ease mb-2 cursor-move list-none border border-gray-300 bg-gray-100 p-2 ${isDragging ? "bg-gray-200" : ""}`}
+      {...attributes}
+      {...listeners}
+    >
       {item.name}
     </div>
   );
