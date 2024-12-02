@@ -1,13 +1,14 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import SortableItem from "@/app/_components/board/SortableItem";
 import {
-  DndContext,
   closestCenter,
+  DndContext,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -15,8 +16,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { type Item } from "@/app/types/item";
-import SortableItem from "@/app/_components/board/SortableItem";
+import { useEffect, useState } from "react";
 
 const style = {
   padding: "1rem",
@@ -40,6 +40,8 @@ const initialColumns = {
 const BoardHome = () => {
   const [isClient, setIsClient] = useState(false);
   const [columns, setColumns] = useState(initialColumns);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [dropTarget, setDropTarget] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -56,8 +58,22 @@ const BoardHome = () => {
     return null;
   }
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
+
+  const handleDragOver = (event: DragEndEvent) => {
+    if (event.over) {
+      setDropTarget(event.over.id as number);
+    } else {
+      setDropTarget(null);
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveId(null);
+    setDropTarget(null);
 
     if (!over) {
       return;
@@ -112,11 +128,14 @@ const BoardHome = () => {
    * TODO
    *  - カラム移動するときに明細が消える
    *  - すべてのItemを移動するとカラムにItemをDragできない
+   *  - Dragするカラムの枠線強調がいらない
    */
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div style={{ display: "flex", gap: "16px", width: "600px" }}>
@@ -134,11 +153,23 @@ const BoardHome = () => {
               }}
             >
               <h3>{column}</h3>
-              <ul style={style}>
-                {columns[column].map((item) => (
-                  <SortableItem key={item.id} item={item} />
+              <div className="space-y-2">
+                {columns[column].map((item, index) => (
+                  <SortableItem
+                    key={item.id}
+                    item={item}
+                    isLast={index === columns[column].length - 1}
+                    showDropLine={
+                      dropTarget === item.id && activeId !== item.id
+                    }
+                  />
                 ))}
-              </ul>
+                {columns[column].length === 0 && (
+                  <div className="flex h-24 items-center rounded-lg border-2 border-dashed border-gray-300">
+                    Drop here
+                  </div>
+                )}
+              </div>
             </div>
           </SortableContext>
         ))}
